@@ -31,7 +31,10 @@ class BacktrackingSudokuSolver(BacktrackingSolver):
         return board.full
 
     def get_candidate_moves(self, board):
-        possible_moves = [(x, y, board.moves_for_square(x, y)) for x, y in board.empty_squares]
+        possible_moves = [
+            (x, y, board.moves_for_square(x, y))
+            for x, y in board.empty_squares
+        ]
         x, y, values = min(possible_moves, key=lambda args: len(args[2]))
         return [(x, y, value) for value in values]
 
@@ -65,7 +68,9 @@ class SudokuBoard:
             for x in range(i, i + 3)
             for y in range(j, j + 3)
         ] for i in range(9, 3) for j in range(9, 3)]
-        squares_good = all(set(square) == set(range(1, 10)) for square in squares)
+        squares_good = all(
+            set(square) == set(range(1, 10)) for square in squares
+        )
         return rows_good and cols_good and squares_good
 
     @property
