@@ -3,7 +3,7 @@ class BacktrackingSolver:
         if self.is_a_solution(state):
             return state
 
-        for move in self.get_candidates(state):
+        for move in self.get_candidate_moves(state):
             self.make_move(move, state)
             solution = self.solve(state)
             if solution:
@@ -16,7 +16,7 @@ class BacktrackingSolver:
     def is_a_solution(self, state):
         raise NotImplemented
 
-    def get_candidates(self, state):
+    def get_candidate_moves(self, state):
         raise NotImplemented
 
     def make_move(self, move, state):
@@ -30,7 +30,7 @@ class BacktrackingSudokuSolver(BacktrackingSolver):
     def is_a_solution(self, board):
         return board.full
 
-    def get_candidates(self, board):
+    def get_candidate_moves(self, board):
         possible_moves = [(x, y, board.moves_for_square(x, y)) for x, y in board.empty_squares]
         x, y, values = min(possible_moves, key=lambda args: len(args[2]))
         return [(x, y, value) for value in values]
