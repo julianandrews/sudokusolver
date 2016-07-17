@@ -50,6 +50,7 @@ class BacktrackingSudokuSolver(BacktrackingSolver):
 class SudokuBoard:
     def __init__(self, board):
         self.exclusion_counts = [[[0] * 9 for i in range(9)] for j in range(9)]
+
         self.board = [[None] * 9 for j in range(9)]
         for y, row in enumerate(board):
             for x, value in enumerate(row):
@@ -57,21 +58,17 @@ class SudokuBoard:
                     self.set_value(x, y, value)
 
     def set_value(self, x, y, value):
-        excluded_value = value if value is not None else self.board[y][x]
-        self.board[y][x] = value
+        excluded_index = (value if value is not None else self.board[y][x]) - 1
         increment = 1 if value is not None else -1
-        excluded_squares = set()
         for i in range(9):
-            if i != x:
-                excluded_squares.add((i, y))
+            self.exclusion_counts[y][i][excluded_index] += increment
         for j in range(9):
-            if j != y:
-                excluded_squares.add((x, j))
+            self.exclusion_counts[j][x][excluded_index] += increment
         for i in range(x // 3 * 3, x // 3 * 3 + 3):
             for j in range(y // 3 * 3, y // 3 * 3 + 3):
-                excluded_squares.add((i, j))
-        for i, j in excluded_squares:
-            self.exclusion_counts[j][i][excluded_value - 1] += increment
+                self.exclusion_counts[j][i][excluded_index] += increment
+
+        self.board[y][x] = value
 
     @property
     def full(self):
