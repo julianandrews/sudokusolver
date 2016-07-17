@@ -106,7 +106,7 @@ class SudokuBoard:
             return joiner.join(tokens)
 
         def row_string(row):
-            values = [str(value) if value is not None else " " for value in row]
+            values = [str(value) if value is not None else "." for value in row]
             return group_and_join(values, 3, "|", " ")
 
         rows = [row_string(row) for row in self.board]
