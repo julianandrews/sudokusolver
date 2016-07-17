@@ -49,10 +49,29 @@ class BacktrackingSudokuSolver(BacktrackingSolver):
 
 class SudokuBoard:
     def __init__(self, board):
-        self.board = board
+        self.exclusion_counts = [[[0] * 9 for i in range(9)] for j in range(9)]
+        self.board = [[None] * 9 for j in range(9)]
+        for y, row in enumerate(board):
+            for x, value in enumerate(row):
+                if value is not None:
+                    self.set_value(x, y, value)
 
     def set_value(self, x, y, value):
+        excluded_value = value if value is not None else self.board[y][x]
         self.board[y][x] = value
+        increment = 1 if value is not None else -1
+        excluded_squares = set()
+        for i in range(9):
+            if i != x:
+                excluded_squares.add((i, y))
+        for j in range(9):
+            if j != y:
+                excluded_squares.add((x, j))
+        for i in range(x // 3 * 3, x // 3 * 3 + 3):
+            for j in range(y // 3 * 3, y // 3 * 3 + 3):
+                excluded_squares.add((i, j))
+        for i, j in excluded_squares:
+            self.exclusion_counts[j][i][excluded_value - 1] += increment
 
     @property
     def full(self):
@@ -81,19 +100,8 @@ class SudokuBoard:
         )
 
     def moves_for_square(self, x, y):
-        row_values = self.board[y]
-        column_values = [self.board[j][x] for j in range(9)]
-        square_values = [
-            self.board[j][i]
-            for i in range(x // 3 * 3, x // 3 * 3 + 3)
-            for j in range(y // 3 * 3, y // 3 * 3 + 3)
-        ]
-        return [
-            value for value in (1, 2, 3, 4, 5, 6, 7, 8, 9)
-            if not value in row_values
-            and not value in column_values
-            and not value in square_values
-        ]
+        result = [i + 1 for (i, count) in enumerate(self.exclusion_counts[y][x]) if count == 0]
+        return result
 
     def __str__(self):
         def group_and_join(values, group_size, group_separator, joiner):
