@@ -31,11 +31,10 @@ class BacktrackingSudokuSolver(BacktrackingSolver):
         return board.full
 
     def get_candidate_moves(self, board):
-        possible_moves = [
-            (x, y, board.moves_for_square(x, y))
-            for x, y in board.empty_squares
-        ]
-        x, y, values = min(possible_moves, key=lambda args: len(args[2]))
+        candidate_squares = board.empty_squares
+        possible_moves = [board.moves_for_square(x, y) for (x, y) in candidate_squares]
+        i, values = min(enumerate(possible_moves), key=lambda args: len(args[1]))
+        x, y = candidate_squares[i]
         return [(x, y, value) for value in values]
 
     def make_move(self, move, board):
@@ -91,14 +90,14 @@ class SudokuBoard:
 
     @property
     def empty_squares(self):
-        return (
+        return [
             (x, y) for x in range(9) for y in range(9)
             if self.board[y][x] is None
-        )
+        ]
 
     def moves_for_square(self, x, y):
-        result = [i + 1 for (i, count) in enumerate(self.exclusion_counts[y][x]) if count == 0]
-        return result
+        counts = self.exclusion_counts[y][x]
+        return [i + 1 for (i, count) in enumerate(counts) if count == 0]
 
     def __str__(self):
         def group_and_join(values, group_size, group_separator, joiner):
