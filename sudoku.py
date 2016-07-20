@@ -74,21 +74,6 @@ class SudokuBoard:
         return all(value is not None for row in self.board for value in row)
 
     @property
-    def solved(self):
-        rows_good = all(set(row) == set(range(1, 10)) for row in self.board)
-        cols = [[self.board[y][x] for x in range(9)] for y in range(9)]
-        cols_good = all(set(col) == set(range(1, 10)) for col in cols)
-        squares = [[
-            self.board[y][x]
-            for x in range(i, i + 3)
-            for y in range(j, j + 3)
-        ] for i in range(9, 3) for j in range(9, 3)]
-        squares_good = all(
-            set(square) == set(range(1, 10)) for square in squares
-        )
-        return rows_good and cols_good and squares_good
-
-    @property
     def empty_squares(self):
         return [
             (x, y) for x in range(9) for y in range(9)
