@@ -31,7 +31,10 @@ class BacktrackingSudokuSolver(BacktrackingSolver):
         return board.full
 
     def get_candidate_moves(self, board):
-        candidate_squares = board.empty_squares
+        candidate_squares = [
+            (x, y) for x in range(9) for y in range(9)
+            if board.board[y][x] is None
+        ]
         possible_moves = [board.moves_for_square(x, y) for (x, y) in candidate_squares]
         i, values = min(enumerate(possible_moves), key=lambda args: len(args[1]))
         x, y = candidate_squares[i]
@@ -48,7 +51,10 @@ class BacktrackingSudokuSolver(BacktrackingSolver):
 
 class SudokuBoard:
     def __init__(self, board):
-        self.exclusion_counts = [[[0] * 9 for i in range(9)] for j in range(9)]
+        self.exclusion_counts = [
+            [{value: 0 for value in range(1, 10)} for i in range(9)]
+            for j in range(9)
+        ]
 
         self.board = [[None] * 9 for j in range(9)]
         for y, row in enumerate(board):
@@ -57,15 +63,15 @@ class SudokuBoard:
                     self.set_value(x, y, value)
 
     def set_value(self, x, y, value):
-        excluded_index = (value if value is not None else self.board[y][x]) - 1
+        exclude_value = value if value is not None else self.board[y][x]
         increment = 1 if value is not None else -1
         for i in range(9):
-            self.exclusion_counts[y][i][excluded_index] += increment
+            self.exclusion_counts[y][i][exclude_value] += increment
         for j in range(9):
-            self.exclusion_counts[j][x][excluded_index] += increment
+            self.exclusion_counts[j][x][exclude_value] += increment
         for i in range(x // 3 * 3, x // 3 * 3 + 3):
             for j in range(y // 3 * 3, y // 3 * 3 + 3):
-                self.exclusion_counts[j][i][excluded_index] += increment
+                self.exclusion_counts[j][i][exclude_value] += increment
 
         self.board[y][x] = value
 
@@ -73,16 +79,9 @@ class SudokuBoard:
     def full(self):
         return all(value is not None for row in self.board for value in row)
 
-    @property
-    def empty_squares(self):
-        return [
-            (x, y) for x in range(9) for y in range(9)
-            if self.board[y][x] is None
-        ]
-
     def moves_for_square(self, x, y):
         counts = self.exclusion_counts[y][x]
-        return [i + 1 for (i, count) in enumerate(counts) if count == 0]
+        return [value for (value, count) in counts.items() if count == 0]
 
     def __str__(self):
         def group_and_join(values, group_size, group_separator, joiner):
